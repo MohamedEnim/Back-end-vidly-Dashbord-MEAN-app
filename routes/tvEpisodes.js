@@ -6,12 +6,21 @@ const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 
-/**done */
+/**
+ * GET /api/tvEpisodes
+ * Purpose: Get all Episodes
+ */
+
 router.get('/', async (req, res) => {
   const tvEpisodes = await TvEpisodes.find().sort('tvShowName');
   res.send(tvEpisodes);
 });
-/**done */
+
+/**
+ * POST /api/tvEpisodes
+ * Purpose: Create an Episode to tvShow
+ */
+
 router.post('/', async (req, res) => {
   const { error } = validate(req.body); 
   if (error) return res.status(400).send(error.details[0].message);
@@ -24,6 +33,7 @@ router.post('/', async (req, res) => {
       tvShowReleaseDate: req.body.tvShowReleaseDate,
       tvEpisodeUrl: req.body.tvEpisodeUrl,
       tvEpisodeNum: req.body.tvEpisodeNum,
+      tvShowGenres:  req.body.tvShowGenres,
       tvEpisodeLanguage: req.body.tvEpisodeLanguage,
       tvEpisodeContry: req.body.tvEpisodeContry,
       createdAt: req.body.createdAt,
@@ -33,7 +43,12 @@ router.post('/', async (req, res) => {
   
   res.send(tvEpisodes);
 });
-/**done */
+
+/**
+ * POST /api/tvEpisodes/add
+ * Purpose: Add an Episode of tvShow
+ */
+
 router.post('/add', async (req, res) => {
   const { error } = validate(req.body); 
   if (error) return res.status(400).send(error.details[0].message);
@@ -46,6 +61,7 @@ router.post('/add', async (req, res) => {
       tvShowReleaseDate: req.body.tvShowReleaseDate,
       tvEpisodeUrl: req.body.tvEpisodeUrl,
       tvEpisodeNum: req.body.tvEpisodeNum,
+      tvShowGenres:  req.body.tvShowGenres,
       tvEpisodeLanguage: req.body.tvEpisodeLanguage,
       tvEpisodeContry: req.body.tvEpisodeContry,
       createdAt: req.body.createdAt,
@@ -55,13 +71,16 @@ router.post('/add', async (req, res) => {
   
   const tvShow = await  TvShow.findByIdAndUpdate( req.body.tvShowId,
     {    
-      tvShowEpisodes: req.body.tvEpisodeNum,
+      tvShowEpisodes: (parseInt(tvShowEpisodes) + 1).toString(),
     }, { new: true });
   res.send(tvEpisodes);
 });
 
+/**
+ * PUT /api/tvEpisodes/:id
+ * Purpose: Update an episode of tvShow
+ */
 
-/**done */
 router.put('/:id', async (req, res) => {
   const { error } = validate(req.body); 
   if (error) return res.status(400).send(error.details[0].message);
@@ -77,6 +96,10 @@ router.put('/:id', async (req, res) => {
   res.send(tvEpisodes);
 });
 
+/**
+ * DELETE /api/tvEpisodes/:tvEpisodeId/:tvShowId
+ * Purpose: Delete an Episode
+ */
 
 router.delete('/:tvEpisodeId/:tvShowId', async (req, res) => {
 
@@ -99,7 +122,12 @@ router.delete('/:tvEpisodeId/:tvShowId', async (req, res) => {
      }
   
 });
-/**Done** */
+
+/**
+ * GET /api/tvEpisodes/:id
+ * Purpose: Get One Episode with id
+ */
+
 router.get('/:id', async (req, res) => {
   const tvEpisodes = await TvEpisodes.find({'tvShowId': req.params.id});
 
@@ -108,7 +136,11 @@ router.get('/:id', async (req, res) => {
   res.send(tvEpisodes);
 });
 
-/**Pending** */
+/**
+ * GET /api/tvEpisodes/toUpdate/:id
+ * Purpose: Get One Episode with id to update
+ */
+
 router.get('/toUpdate/:id', async (req, res) => {
   const tvEpisode = await TvEpisodes.findById(req.params.id);
 

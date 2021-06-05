@@ -4,17 +4,6 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const UserSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    //minlength: 5,
-   // maxlength: 50
-  }
-  
-  ,lastName: {
-    type: String,
-   // minlength: 5,
-   // maxlength: 50
-  },
 
   userPoster: {
     type: String,
@@ -33,16 +22,7 @@ const UserSchema = new mongoose.Schema({
     minlength: 5,
     maxlength: 1024
   },
-  sessions: [{
-    token: {
-        type: String,
-        required: true
-    },
-    expiresAt: {
-        type: String,
-        required: true
-    }
-}],
+  tokens: [String],
   userRole: {
     type: String,
     enum: ['ADMIN', 'SUPER_ADMIN', 'USER'],
@@ -56,7 +36,7 @@ UserSchema.methods.generateAuthToken = function() {
 }
 
 UserSchema.methods.generateRefreshAuthToken = function () {
-  const refreshToken = jwt.sign({ _id: this._id, userRole: this.userRole }, process.env.REFRESH_TOKEN_SECRET,  { expiresIn: '10d' });
+  const refreshToken = jwt.sign({ _id: this._id, userRole: this.userRole }, process.env.REFRESH_TOKEN_SECRET,  { expiresIn: '3d' });
   return refreshToken;
 }
 
@@ -70,17 +50,12 @@ UserSchema.methods.createSession = function () {
 
 /* HELPER METHODS */
 let saveSessionToDatabase = async (user, refreshToken) => {
-      let expiresAt = generateRefreshTokenExpiryTime();
-      user.sessions.push({ 'token': refreshToken, expiresAt });
+      user.tokens.push(refreshToken);
       const newUser = await user.save();
       return newUser;
 }
 
-let generateRefreshTokenExpiryTime = () => {
-  let daysUntilExpire = "10";
-  let secondsUntilExpire = ((daysUntilExpire * 24) * 60) * 60;
-  return ((Date.now() / 1000) + secondsUntilExpire);
-}
+
 
 const User = mongoose.model('User', UserSchema);
 

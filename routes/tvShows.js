@@ -1,5 +1,6 @@
 const {TvShow, validate} = require('../models/tvShow'); 
 const {TvEpisodes} = require('../models/tvEpisode');
+const auth = require('../middleware/auth');
 const mongoose = require('mongoose');
 const multer = require("multer");
 const express = require('express');
@@ -31,13 +32,22 @@ const storage = multer.diskStorage({
   }
 });
 
-/****Done */
-router.get('/', async (req, res) => {
+/**
+ * GET /api/tvShows
+ * Purpose: Get all TVShows
+ */
+
+router.get('/', auth, async (req, res) => {
   const tvShows = await TvShow.find().sort();
   res.send(tvShows);
 });
-/**Done */
-router.post('/',  multer({ storage: storage }).single("image"), async (req, res) => {
+
+/**
+ * POST /api/tvShows
+ * Purpose: Create a TVShow
+ */
+
+router.post('/', auth,  multer({ storage: storage }).single("image"), async (req, res) => {
 
  const url = req.protocol + "://" + req.get("host");
   
@@ -57,6 +67,11 @@ router.post('/',  multer({ storage: storage }).single("image"), async (req, res)
   
   res.send(tvShow);
 });
+
+/**
+ * PUT /api/tvShows/:id
+ * Purpose: Update a TVShow with a new poster
+ */
 
 router.put('/:id' ,  multer({ storage: storage }).single("image"), async (req, res) => {
  
@@ -83,35 +98,21 @@ router.put('/:id' ,  multer({ storage: storage }).single("image"), async (req, r
     tvShowSeason: tvShow.tvShowSeason,
     tvShowReleaseDate: tvShow.tvShowReleaseDate,
     tvEpisodeLanguage: tvShow.tvShowLanguage,
+    tvShowGenres: tvShow.tvShowGenres,
     tvShowPoster:  tvShow.tvShowPoster,
     tvEpisodeContry: tvShow.tvShowContry,
    }, { new: true })
+
+  res.send(tvShow);
   
-res.send(tvShow);
 });
 
-router.delete('/:id', async (req, res) => {
- 
-  const tvShow = await TvShow.findByIdAndRemove(req.params.id);
+/**
+ * PUT /api/tvShows/:id
+ * Purpose: Update a TVShow with the same  poster
+ */
 
-  if (!tvShow) return res.status(404).send('The TvShow with the given ID was not found.');
-
-  const tvEpisode = await TvEpisodes.deleteMany({'tvShowId': req.params.id})
-
-  res.send(tvShow);
-});
-
-/**Done */
-router.get('/:id', async (req, res) => {
-  const tvShow = await TvShow.findById(req.params.id);
-
-  if (!tvShow) return res.status(404).send('The tvShow with the given ID was not found.');
-
-  res.send(tvShow);
-});
-
-/****Done */
-router.put('/samePoster/:id', async (req, res) => {
+ router.put('/samePoster/:id', async (req, res) => {
   
   const tvShow = await TvShow.findByIdAndUpdate(req.params.id,
     { 
@@ -133,10 +134,59 @@ router.put('/samePoster/:id', async (req, res) => {
       tvShowName: req.body.tvShowName,
       tvShowSeason: req.body.tvShowSeason,
       tvShowReleaseDate: req.body.tvShowReleaseDate,
+      tvShowGenres: req.body.tvShowGenres,
       tvEpisodeLanguage: req.body.tvShowLanguage,
       tvEpisodeContry: req.body.tvShowContry,
      }, { new: true })
    
   res.send(tvShow);
 });
+
+/**
+ * DELETE /api/tvShows/:id
+ * Purpose: Delete a TVShow
+ */
+
+router.delete('/:id', async (req, res) => {
+ 
+  const tvShow = await TvShow.findByIdAndRemove(req.params.id);
+
+  if (!tvShow) return res.status(404).send('The TvShow with the given ID was not found.');
+
+  const tvEpisode = await TvEpisodes.deleteMany({'tvShowId': req.params.id})
+
+  res.send(tvShow);
+});
+
+/**
+ * GET /api/tvShows/:id
+ * Purpose: Get One TVShow with id
+ */
+
+
+router.get('/:id', async (req, res) => {
+  const tvShow = await TvShow.findById(req.params.id);
+
+  if (!tvShow) return res.status(404).send('The tvShow with the given ID was not found.');
+
+  res.send(tvShow);
+});
+
+
+/**
+ * MOBILE API
+ * GET /api/tvShows/selectTvShow/:name
+ * Purpose: Get TVShow with name
+ */
+
+ router.get('/selectTvShow/:name', async (req, res) => {
+  const name = req.params.name;
+  const tvShow = await TvShow.find({ tvShowName: { $regex: new RegExp('.*' + name + '.*'), $options: 'i' } } );
+  
+    if (!tvShow) return res.status(404).send('The tvShow with the given name was not found.');
+    res.send(tvShow);
+  });
+  
+  
+
 module.exports = router; 
