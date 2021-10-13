@@ -34,6 +34,10 @@ const tvEpisodes = new mongoose.Schema({
       type: String,
       required: true
     },
+    tvShowGenres: { 
+      type: [String],  
+      required: true
+    },
 
     tvEpisodeLanguage: {
       type: String,
@@ -62,7 +66,6 @@ const tvEpisodes = new mongoose.Schema({
 const TvEpisodes = mongoose.model('TvEpisodes', tvEpisodes);
 
 function validateTvEpisodes(tvEpisode) {
-  console.log(tvEpisode);
     const schema = Joi.object(
   {
     tvShowName: Joi.string().required(),
@@ -72,6 +75,7 @@ function validateTvEpisodes(tvEpisode) {
     tvShowReleaseDate: Joi.string().required(),
     tvEpisodeUrl: Joi.string().required(),
     tvEpisodeNum: Joi.string().required(),
+    tvShowGenres: Joi.array().items(Joi.string()).required(),
     tvEpisodeLanguage: Joi.string().required(),
     tvEpisodeContry: Joi.string().required(),
     createdAt: Joi.string().required(),

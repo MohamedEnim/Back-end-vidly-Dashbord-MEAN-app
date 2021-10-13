@@ -30,19 +30,30 @@ const storage = multer.diskStorage({
   }
 });
 
+/**
+ * GET /api/movies
+ * Purpose: Get all Movies
+ */
 router.get('/', auth, async (req, res) => {
   const movies = await Movie.find().sort('movieReleaseDate');
   res.send(movies);
 });
 
-/**** Trending ****/
-router.get('/trending', async (req, res) => {
+/**
+ * GET /api/movies/trending
+ * Purpose: Get all Trending Movies
+ */
+router.get('/trending', auth, async (req, res) => {
   const movies = await Movie.find({ movieTrending: true }).sort('movieName');
   res.send(movies);
 });
 
+/**
+ * POST /api/movies
+ * Purpose: Create a Movie
+ */
 
-router.post('/',  multer({ storage: storage }).single("image"), async (req, res) => {
+router.post('/', auth, multer({ storage: storage }).single("image"), async (req, res) => {
   
   const url = req.protocol + "://" + req.get("host");
 
@@ -66,7 +77,12 @@ router.post('/',  multer({ storage: storage }).single("image"), async (req, res)
   res.send(movie);
 });
 
-router.put('/:id',  multer({ storage: storage }).single("image"), async (req, res) => {
+/**
+ * PUT /api/movies/:id
+ * Purpose: Update a Movie with new poster
+ */
+
+router.put('/:id', auth, multer({ storage: storage }).single("image"), async (req, res) => {
  
   const url = req.protocol + "://" + req.get("host");
 
@@ -92,7 +108,12 @@ router.put('/:id',  multer({ storage: storage }).single("image"), async (req, re
   res.send(movie);
 });
 
-router.put('/samePoster/:id', async (req, res) => {
+/**
+ * PUT /api/movies/samePoster/:id
+ * Purpose: Update a Movie with the same  poster
+ */
+
+router.put('/samePoster/:id', auth, async (req, res) => {
   
   const movie = await Movie.findByIdAndUpdate(req.params.id,
     { 
@@ -116,7 +137,12 @@ router.put('/samePoster/:id', async (req, res) => {
   res.send(movie);
 });
 
-router.delete('/:id', async (req, res) => {
+/**
+ * DELETE /api/movies/:id
+ * Purpose: Delete a Movie
+ */
+
+router.delete('/:id', auth, async (req, res) => {
   const movie = await Movie.findByIdAndRemove(req.params.id);
 
   if (!movie) return res.status(404).send('The movie with the given ID was not found.');
@@ -124,7 +150,12 @@ router.delete('/:id', async (req, res) => {
   res.send(movie);
 });
 
-router.get('/:id', async (req, res) => {
+/**
+ * GET /api/movies/:id
+ * Purpose: Get One Movie with id
+ */
+
+router.get('/:id', auth, async (req, res) => {
   const movie = await Movie.findById(req.params.id);
 
   if (!movie) return res.status(404).send('The movie with the given ID was not found.');
@@ -132,16 +163,12 @@ router.get('/:id', async (req, res) => {
   res.send(movie);
 });
 
-/*router.get('/genre/:name', async (req, res) => {
-  const genreName = req.params.name;
-  const movie = await Movie.find({movieGenres: genreName});
+/**
+ * MOBILE API
+ * GET /api/movies/selectMovie/:name
+ * Purpose: Get Movie with name
+ */
 
-  if (!movie) return res.status(404).send('The movie with the given ID was not found.');
-
-  res.send(movie);
-});*/
-
-/**MOBILE API GET movie by name */
 router.get('/selectMovie/:name', async (req, res) => {
 const name = req.params.name;
 const movie = await Movie.find({ movieName :{ $regex: new RegExp('.*' + name + '.*'), $options: 'i' } } );
