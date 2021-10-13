@@ -7,10 +7,15 @@ const movies = require('./routes/movies');
 const tvShows = require('./routes/tvShows');
 const auth = require('./routes/auth');
 const tvEpisodes = require('./routes/tvEpisodes');
-
+const dotenv = require('dotenv');
+dotenv.config();
 
 const app = express();
-mongoose.connect('mongodb://localhost:27017/vidly', {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
+console.log(process.env.DATAB);
+mongoose.connect(process.env.DATAB || "mongodb://localhost:27017/vidly", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false })
            // .then(() => console.log('Connected to MongoDB...'))
            // .catch(err => console.error('Could not connect to MongoDB...'));
 
